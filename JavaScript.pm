@@ -44,8 +44,7 @@ sub __jsdump {
     }
     $dict->{$elem} = $sym;
 
-    my $isary = eval { my @ary = @$elem; 1;};
-    if ($isary == 1) {
+    if (UNIVERSAL::isa($elem, 'ARRAY')) {
         my @list = ("$sym = new Array;");
         my $n = 0;
         foreach (@$elem) {
@@ -56,8 +55,7 @@ sub __jsdump {
         return @list;
     }
 
-    my $ishash = eval { my %hash = %$elem; 1;};
-    if ($ishash == 1) {
+    if (UNIVERSAL::isa($elem, 'HASH')) {
         my @list = ("$sym = new Object;");
         my ($k, $v);
         foreach $k (keys %$elem) {
