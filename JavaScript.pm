@@ -1,7 +1,7 @@
 package Data::JavaScript;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $UNDEF);
+use vars qw($VERSION @ISA @EXPORT $UNDEF);
 use subs qw(quotemeta);
 
 require Exporter;
@@ -9,7 +9,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(jsdump hjsdump);
 
-$VERSION = 1.07;
+$VERSION = 1.08;
 $UNDEF = q('');
 
 sub import{
@@ -131,20 +131,19 @@ at compile time by supplying the default value in anonymous hash like so
 
 The first argument is required, the name of JavaScript object to create.
 
-The second argument is required, a hashref or arrayref. Structures can be
-nested, circular referrencing is supported EXPERIMENTALLY only.
+The second argument is required, a hashref or arrayref.
+Structures can be nested, circular referrencing is supported EXPERIMENTALLY.
 
-The third argument is optional, a scalar whose value is to be used when
-dumping a structure. If unspecified undef is output as C<''>. Other useful
-values might be C<0>, C<q(null);> and C<q(NaN);>
+The third argument is optional, a scalar whose value is to be used en lieu
+of undefenied values when dumping a structure. If unspecified undef is output
+as C<''>. Other useful values might be C<0>, C<null> and C<NaN>
 
-When called in array context, the functions return an array of code
-lines. When called in scalar context, it returns one chunk of lines
-delimited by line fields.
+When called in list context, the functions return a list of lines.
+In scalar context, it returns a string.
 
 =item hjsdump('name', \$reference, [$undef]);
 
-hjsdump is identical jsdump except that it add HTML tags to embed the
+hjsdump is identical to jsdump except that it adds HTML tags to embed the
 script inside an HTML page.
 
 =back

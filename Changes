@@ -1,5 +1,8 @@
 Revision history for Perl extension Data::JavaScript.
 
+1.08  Thu Feb 13 09:04:27 EST 2003
+	- Touched up the documentation
+
 1.07  Sat Feb  8 12:40:16 EST 2003
         - Added means to control how undef is dumped, suggested by Slaven Rezic
 	  In doing so I have removed the undocumented feature that a list
