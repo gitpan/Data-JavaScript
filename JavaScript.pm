@@ -2,7 +2,6 @@ package Data::JavaScript;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-use Tie::RefHash;
 use subs qw(quotemeta);
 
 require Exporter;
@@ -11,12 +10,12 @@ require Exporter;
 @EXPORT = qw(
     jsdump hjsdump
 );
-$VERSION = 1.05;
+$VERSION = 1.06;
 
 sub quotemeta {
 	my $text = CORE::quotemeta(shift);
 	$text =~ s/\\ / /g;
-	$text =~ s/\\([\x80-\xFF])/sprintf("\\%03o", ord($1))/ge;
+	$text =~ s/\\([^\x20-\x7E])/sprintf("\\%03o", ord($1))/ge;
 	$text;
 }
 
@@ -25,7 +24,6 @@ sub jsdump {
     return "var $sym;\n" unless (@_);
     my $elem = $#_ ? [@_] : $_[0];
     my %dict;
-    tie %dict, 'Tie::RefHash';
     my @res = __jsdump($sym, $elem, \%dict);
     $res[0] = "var " . $res[0];
     wantarray ? @res : join("\n", @res, "");
