@@ -3,5 +3,6 @@ JavaScript.pm
 MANIFEST
 README
 Makefile.PL
-test.pl
+t/1.t
+t/2.t
 example.pl
