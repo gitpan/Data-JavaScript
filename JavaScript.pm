@@ -3,6 +3,7 @@ package Data::JavaScript;
 use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Tie::RefHash;
+use subs qw(quotemeta);
 
 require Exporter;
 
@@ -10,7 +11,14 @@ require Exporter;
 @EXPORT = qw(
     jsdump hjsdump
 );
-$VERSION = '1.04';
+$VERSION = 1.05;
+
+sub quotemeta {
+	my $text = CORE::quotemeta(shift);
+	$text =~ s/\\ / /g;
+	$text =~ s/\\([\x80-\xFF])/sprintf("\\%03o", ord($1))/ge;
+	$text;
+}
 
 sub jsdump {
     my $sym = shift;
@@ -57,12 +65,12 @@ sub __jsdump {
 
     if (UNIVERSAL::isa($elem, 'HASH')) {
         my @list = ("$sym = new Object;");
-        my ($k, $v);
+        my ($k, $old_k, $v);
         foreach $k (keys %$elem) {
-            $k = quotemeta($k);
+            $k = quotemeta($old_k=$k);
             my $newsym = (($k =~ /^[a-z_]\w+$/i) ? "$sym.$k" : 
                   "$sym\['$k']");
-            push(@list, __jsdump($newsym, $elem->{$k}, $dict));
+            push(@list, __jsdump($newsym, $elem->{$old_k}, $dict));
         }
         return @list;
     }
@@ -110,6 +118,10 @@ delimited by line fields.
 =head1 AUTHOR
 
 Ariel Brosh, schop@cpan.org. Inspired by WDDX.pm JavaScript support.
+
+=head1 CREDITS 
+
+Garick Hamlin B<ghamlin@typhoon.lightning.net>, fixing of quoting bug.
 
 =head1 SEE ALSO
 
