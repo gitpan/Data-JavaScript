@@ -61,7 +61,7 @@ sub __jsdump {
         foreach $k (keys %$elem) {
             $k = quotemeta($k);
             my $newsym = (($k =~ /^\w+$/) ? "$sym.$k" : 
-                  "$sym\[$k]");
+                  "$sym\['$k']");
             push(@list, __jsdump($newsym, $elem->{$k}, $dict));
         }
         return @list;
