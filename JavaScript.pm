@@ -10,7 +10,7 @@ require Exporter;
 @EXPORT = qw(
     jsdump hjsdump
 );
-$VERSION = '1.03';
+$VERSION = '1.04';
 
 sub jsdump {
     my $sym = shift;
@@ -60,7 +60,7 @@ sub __jsdump {
         my ($k, $v);
         foreach $k (keys %$elem) {
             $k = quotemeta($k);
-            my $newsym = (($k =~ /^\w+$/) ? "$sym.$k" : 
+            my $newsym = (($k =~ /^[a-z_]\w+$/i) ? "$sym.$k" : 
                   "$sym\['$k']");
             push(@list, __jsdump($newsym, $elem->{$k}, $dict));
         }
@@ -83,9 +83,9 @@ code
 
   use Data::JavaScript;
   
-  @code = jsdump($array_ref, 'my_array');
-  $code = jsdump($hash_ref, 'my_object');
-  $code = hjsdump($array_ref B<or> $hash_ref, 'my_stuff');
+  @code = jsdump('my_array', $array_ref);
+  $code = jsdump('my_object', $hash_ref);
+  $code = hjsdump('my_stuff', $array_ref B<or> $hash_ref);
 
 =head1 DESCRIPTION
 
