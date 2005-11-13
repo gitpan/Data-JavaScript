@@ -10,5 +10,5 @@ $hash = {'string' => 'Joseph',
          'xor' => [[0, 1], [1, 0]]};
 $hash->{'ref'} = $hash;
 
-print scalar(hjsdump("facts", $hash, 31.4e-1));
+print scalar(jsdump("facts", $hash, 31.4e-1));
                         

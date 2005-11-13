@@ -1,6 +1,6 @@
 Dump perl structures to JavaScript code.
 
-Example:
+example.pl:
 
 use Data::JavaScript;
 

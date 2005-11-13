@@ -1,0 +1,26 @@
+Numbers
+      Infinity
+
+      NaN
+
+      const
+
+More robust var naming (get & use perl names?)
+
+Unify:
+	Data::JavaScript
+	Data::JavaScript::LiteObject
+		allow objects to be stuffed into an array and use the key names
+		as var names? to what end, would have to know var names
+
+	Data::JavaScript::Anon		(Perl: anonymous :: JS: literal)
+		jsdump takes undef as name
+
+		worries too much about valid numbers, but not strings
+
+	Template::Plugin::JavaScript
+		__quotemeta
+
+	XML feed, Atom feed?
+
+ECMAScript and charset support for hjsdump; non-ASCII literals
