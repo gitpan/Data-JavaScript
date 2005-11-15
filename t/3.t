@@ -1,5 +1,5 @@
 BEGIN { $| = 1; $] < 5.007 ?
-      do{ print "1..0 #No real Unicode\n"; exit} : print "1..5\n"; }
+      do{ print "1..0 # Skipped: No real Unicode\n"; exit} : print "1..4\n"; }
 use Data::JavaScript;
 
 #Test undef default
@@ -17,13 +17,9 @@ print "ok 2 #$_\n";
 
 $_ = join('', jsdump("unicode", "Euros (\x{20ac}) aren't Ecus (\x{20a0})"));
 print 'not ' unless $_ eq
-	q(var unicode = "Euros (\u20AC) aren\x27t Ecus (\u20A0)";);
+	q(var unicode = "Euros (\u20AC) aren't Ecus (\u20A0)";);
 print "ok 3 #$_\n";
 
 $_ = join('', jsdump("Cherokee", "\x{13E3}\x{13E3}\x{13E3}"));
 print 'not ' unless $_ eq q(var Cherokee = "\u13E3\u13E3\u13E3";);
-print "ok 4 #$_\n";
-
-$_ = join('', jsdump('thang', "\'\"\n\xa0\x{03b4}"));
-print 'not ' unless $_ eq 'var thang = "\x27\x22\x0A\u00A0\u03B4";';
 print "ok 5 #$_\n";

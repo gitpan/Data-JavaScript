@@ -1,6 +1,16 @@
 Revision history for Perl extension Data::JavaScript.
 
-1.10 Sun Nov 13 03:50 EST 2005
+1.11  Tue Nov 15 14:30:22 EST 2005
+	- Touched up documentation
+	- Fixed syntax errors for hash key names that are also JS keywords
+	  Reported by Kevin J. of Activestate
+	- Hash keys are now dumped in alphabetical order, this makes code
+	  easier to debug (as suggested by Scott Wessels) and is necessary
+	  for thorough testing.
+	- Special characters tab, newline, carriage return, ", and \ are
+	  now escaped in place instead of as hex: \t, \n, \r, \", \\
+
+1.10  Sun Nov 13 03:50 EST 2005
 	- Touched up documentation
 	- Explicitly requires Perl 5
 	- Previously undocumented, "private", quotemeta is now __quotemeta
@@ -17,7 +27,7 @@ Revision history for Perl extension Data::JavaScript.
 	  strings as well.
 
 	  Thanks for reports from Javier Arturo Rodriguez, Marius Feraru,
-	  Joseph Annino, Alan Fairless
+	  Joseph Annino, Alan Fairless, Kevin J.
 	- quotemeta has been completely rewritten with support for Unicode
 
 	  Thanks for reports from Slaven Rezic, Marius Feraru, Sean Burke
