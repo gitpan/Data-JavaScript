@@ -1,5 +1,3 @@
-Extract common aspects of __quotemeta into a string?
-
 ECMAScript and charset support for hjsdump
 
 Encoding, escape [^[:print:]]

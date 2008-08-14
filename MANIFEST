@@ -5,8 +5,9 @@ TODO
 JavaScript.pm
 Makefile.PL
 t/1-load.t
-t/2-noArgs.t
+t/2-import.t
+t/3-js12.t
+t/3-noArgs.t
 t/3-undef.t
-t/4-js12.t
-t/5-escape.t
+t/4-escape.t
 example.pl

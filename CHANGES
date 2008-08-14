@@ -1,5 +1,9 @@
 Revision history for Perl extension Data::JavaScript.
 
+1.13  Thu Aug 14 11:01:10 EDT 2008
+	- Finished implementing import
+	- "Simplified"/unified __quotemeta code forks
+
 1.12  Wed Aug 13 22:48:12 EDT 2008
 	- Some minor refactoring, including the removal of a dependency on
 	  Exporter

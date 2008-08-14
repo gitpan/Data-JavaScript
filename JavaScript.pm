@@ -2,7 +2,7 @@ package Data::JavaScript;
 require 5;
 use vars qw(@EXPORT @EXPORT_OK %OPT $VERSION);
 %OPT = (JS=>1.3);
-$VERSION = 1.12;
+$VERSION = 1.13;
 
 @EXPORT = qw(jsdump hjsdump);
 @EXPORT_OK = '__quotemeta';
@@ -21,22 +21,27 @@ sub import{
   }
   $OPT{UNDEF} ||=  $OPT{JS} > 1.2 ? 'undefined' : q('');
 
-
-#  Data::JavaScript->export_to_level(1, grep {!ref($_)} @_);
   #use (); #imports nothing, as package is not supplied
   if( defined $package ){
     no strict 'refs';
 
-    my $caller = caller;
+    #Remove options hash
     my @import = grep { ! length ref } @_;
 
     if( scalar @import ){
-      #XXX only :all (@EXPORT, #EXPORT_OK), or subset thereof
+      if( grep {/^:all$/} @import ){
+	@import = (@EXPORT, @EXPORT_OK) }
+      else{
+	#only user-specfied subset of @EXPORT, @EXPORT_OK
+	my $q = qr/@{[join('|', @EXPORT, @EXPORT_OK)]}/;
+	@import = grep { $_ =~ /$q/ } @import;
+      }
     }
     else{
       @import = @EXPORT;
     }
     
+    my $caller = caller;
     for my $func (@import) {
       *{"$caller\::$func"} = \&$func;
     }
@@ -60,53 +65,43 @@ sub jsdump {
     wantarray ? @res : join("\n", @res, "");
 }
 
+
+my $QMver;
 if( $] < 5.007 ){
-    eval <<'EO5';
-sub __quotemeta {
-  local $_ = shift;
-
-  s<([^ \x21-\x5B\x5D-\x7E]+)>{sprintf(join('', '\x%02X' x length$1), unpack'C*',$1)}ge;
-
-  #This is kind of ugly/inconsistent output for munged UTF-8
-  #tr won't work because we need the escaped \ for JS output
-  s/\\x09/\\t/g;
-  s/\\x0A/\\n/g;
-  s/\\x0D/\\r/g;
-  s/"/\\"/g;
-  s/\\x5C/\\\\/g;
-
-  #Escape </script> for stupid browsers that stop parsing
-  s%</script>%\\x3C\\x2Fscript\\x3E%g;
-
-  return $_;
-}
+  $QMver=<<'EO5';
+    s<([^ \x21-\x5B\x5D-\x7E]+)>{sprintf(join('', '\x%02X' x length$1), unpack'C*',$1)}ge;
 EO5
 }
-    else{
-	eval<<'EO58';
-sub __quotemeta {
-  local $_ = shift;
-  if( $OPT{JS} >= 1.3 && Encode::is_utf8($_) ){
-      s<([\x{0080}-\x{fffd}]+)>{sprintf '\u%0*v4X', '\u', $1}ge;
-  }
-  
-  {
-    use bytes;
-    s<((?:[^ \x21-\x7E]|(?:\\(?!u)))+)>{sprintf '\x%0*v2X', '\x', $1}ge;
-  }
+else{
+  $QMver=<<'EO58';
+    if( $OPT{JS} >= 1.3 && Encode::is_utf8($_) ){
+        s<([\x{0080}-\x{fffd}]+)>{sprintf '\u%0*v4X', '\u', $1}ge;
+    }
 
-  s/\\x09/\\t/g;
-  s/\\x0A/\\n/g;
-  s/\\x0D/\\r/g;
-  s/"/\\"/g;
-  s/\\x5C/\\\\/g;
-
-  s%</script>%\\x3C\\x2Fscript\\x3E%g;
-
-  return $_;
-}
+    {
+      use bytes;
+      s<((?:[^ \x21-\x7E]|(?:\\(?!u)))+)>{sprintf '\x%0*v2X', '\x', $1}ge;
+    }
 EO58
 }
+
+eval 'sub __quotemeta {local $_ = shift;' . $QMver . <<'EOQM';
+
+    #This is kind of ugly/inconsistent output for munged UTF-8
+    #tr won't work because we need the escaped \ for JS output
+    s/\\x09/\\t/g;
+    s/\\x0A/\\n/g;
+    s/\\x0D/\\r/g;
+    s/"/\\"/g;
+    s/\\x5C/\\\\/g;
+
+    #Escape </script> for stupid browsers that stop parsing
+    s%</script>%\\x3C\\x2Fscript\\x3E%g;
+
+    return $_;
+  }
+EOQM
+
 
 sub __jsdump {
     my ($sym, $elem, $dict, $undef) = @_;
@@ -178,7 +173,7 @@ Data::JavaScript - Dump perl data structures into JavaScript code
 
 =head1 DESCRIPTION
 
-This module is mainly inteded for CGI programming, when a perl script
+This module is mainly intended for CGI programming, when a perl script
 generates a page with client side JavaScript code that needs access to
 structures created on the server.
 
@@ -202,6 +197,11 @@ compile time by supplying the default value on the C<use> line:
 
 Other useful values might be C<0>, C<null>, or C<NaN>.
 
+=head1 EXPORT
+
+In addition, althought the module no longer uses Exporter, it heeds its
+import conventions; C<qw(:all>), C<()>, etc.
+
 =over
 
 =item jsdump('name', \$reference, [$undef]);
@@ -221,10 +221,16 @@ In scalar context, it returns a string.
 
 hjsdump is identical to jsdump except that it wraps the content in script tags.
 
+=back
+
+=head1 EXPORTABLE
+
+=over
+
 =item __quotemeta($str)
 
-Not exported by default, this function escapes non-printable and Unicode
-characters to promote playing nice with others.
+This function escapes non-printable and Unicode characters (where possible)
+to promote playing nice with others.
 
 =back
 
