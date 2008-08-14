@@ -4,9 +4,9 @@ README
 TODO
 JavaScript.pm
 Makefile.PL
-t/1.t
-t/2.t
-t/3.t
-t/4.t
-t/5.t
+t/1-load.t
+t/2-noArgs.t
+t/3-undef.t
+t/4-js12.t
+t/5-escape.t
 example.pl

@@ -1,32 +1,48 @@
 package Data::JavaScript;
 require 5;
-use vars qw(@EXPORT @EXPORT_OK @ISA %OPT $VERSION);
+use vars qw(@EXPORT @EXPORT_OK %OPT $VERSION);
 %OPT = (JS=>1.3);
-$VERSION = 1.11;
+$VERSION = 1.12;
 
-use Exporter;
 @EXPORT = qw(jsdump hjsdump);
 @EXPORT_OK = '__quotemeta';
-@ISA = qw(Exporter);
 
 use strict;
 require Encode unless $] < 5.007;
 
 sub import{
+  my $package = shift;
+
   foreach( @_ ){
     if(ref($_) eq 'HASH'){
-      foreach my $opt ( 'UNDEF', 'JS' ){
-	if(exists($_->{$opt})){
-	  $OPT{$opt} = $_->{$opt};
-	}
-      }
+      $OPT{JS} = $$_{JS} if exists($$_{JS});
+      $OPT{UNDEF} = $$_{UNDEF} if exists($$_{UNDEF});
     }
   }
-  $OPT{UNDEF} = exists($OPT{UNDEF}) || $OPT{JS} > 1.2 ? 'undefined' : q('');
-  Data::JavaScript->export_to_level(1, grep {!ref($_)} @_);
+  $OPT{UNDEF} ||=  $OPT{JS} > 1.2 ? 'undefined' : q('');
+
+
+#  Data::JavaScript->export_to_level(1, grep {!ref($_)} @_);
+  #use (); #imports nothing, as package is not supplied
+  if( defined $package ){
+    no strict 'refs';
+
+    my $caller = caller;
+    my @import = grep { ! length ref } @_;
+
+    if( scalar @import ){
+      #XXX only :all (@EXPORT, #EXPORT_OK), or subset thereof
+    }
+    else{
+      @import = @EXPORT;
+    }
+    
+    for my $func (@import) {
+      *{"$caller\::$func"} = \&$func;
+    }
+  }
 }
 
-#XXX version, ECMAscript even. Charset!
 sub hjsdump {
     my @res = (qq(<script type="text/javascript" language="JavaScript$OPT{JS}" />),
 	       '<!--', &jsdump(@_), '// -->', '</script>');
@@ -52,11 +68,15 @@ sub __quotemeta {
   s<([^ \x21-\x5B\x5D-\x7E]+)>{sprintf(join('', '\x%02X' x length$1), unpack'C*',$1)}ge;
 
   #This is kind of ugly/inconsistent output for munged UTF-8
+  #tr won't work because we need the escaped \ for JS output
   s/\\x09/\\t/g;
   s/\\x0A/\\n/g;
   s/\\x0D/\\r/g;
   s/"/\\"/g;
   s/\\x5C/\\\\/g;
+
+  #Escape </script> for stupid browsers that stop parsing
+  s%</script>%\\x3C\\x2Fscript\\x3E%g;
 
   return $_;
 }
@@ -71,7 +91,7 @@ sub __quotemeta {
   }
   
   {
-    use bytes;  
+    use bytes;
     s<((?:[^ \x21-\x7E]|(?:\\(?!u)))+)>{sprintf '\x%0*v2X', '\x', $1}ge;
   }
 
@@ -81,6 +101,8 @@ sub __quotemeta {
   s/"/\\"/g;
   s/\\x5C/\\\\/g;
 
+  s%</script>%\\x3C\\x2Fscript\\x3E%g;
+
   return $_;
 }
 EO58
@@ -88,8 +110,9 @@ EO58
 
 sub __jsdump {
     my ($sym, $elem, $dict, $undef) = @_;
+    my $ref;
 
-    unless (ref($elem)) {
+    unless( $ref = ref($elem) ){
       unless( defined($elem) ){
 	return "$sym = @{[defined($undef) ? $undef : $OPT{UNDEF}]};";
       }
@@ -111,7 +134,8 @@ sub __jsdump {
     }
     $dict->{$elem} = $sym;
 
-    if (UNIVERSAL::isa($elem, 'ARRAY')) {
+    #isa over ref in case we're given objects
+    if( $ref eq 'ARRAY' || UNIVERSAL::isa($elem, 'ARRAY') ){
         my @list = ("$sym = new Array;");
         my $n = 0;
         foreach (@$elem) {
@@ -121,8 +145,7 @@ sub __jsdump {
         }
         return @list;
     }
-
-    if (UNIVERSAL::isa($elem, 'HASH')) {
+    elsif(  $ref eq 'HASH' || UNIVERSAL::isa($elem, 'HASH') ){
         my @list = ("$sym = new Object;");
         my ($k, $old_k, $v);
         foreach $k (sort keys %$elem) {
@@ -131,6 +154,9 @@ sub __jsdump {
 	  push(@list, __jsdump($newsym, $elem->{$old_k}, $dict, $undef));
         }
         return @list;
+    }
+    else{
+      return "//Unknown reference: $sym=$ref";
     }
 }
 
@@ -207,7 +233,8 @@ characters to promote playing nice with others.
 Previously, the module eval'd any data it received that looked like a number;
 read: real, hexadecimal, octal, or engineering notations. It now passes all
 non-decimal values through as strings. You will need to C<eval> on the client
-or server side if you wish to use other notations as numbers.
+or server side if you wish to use other notations as numbers. This is meant
+to protect people who store ZIP codes with leading 0's.
 
 Unicode support requires perl 5.8 or later. Older perls will gleefully escape
 the non-printable portions of any UTF-8 they are fed, likely munging it in
@@ -215,9 +242,26 @@ the process as far as JavaScript is concerned. If this turns out to be a
 problem and there is sufficient interest it may be possible to hack-in UTF-8
 escaping for older perls.
 
+=head1 LICENSE
+
+=over
+
+=item * Thou shalt not claim ownership of unmodified materials.
+
+=item * Thou shalt not claim whole ownership of modified materials.
+
+=item * Thou shalt grant the indemnity of the provider of materials.
+
+=item * Thou shalt use and dispense freely without other restrictions.
+
+=back
+
+Or if you truly insist, you may use and distribute this under ther terms
+of Perl itself (GPL and/or Artistic License).
+
 =head1 SEE ALSO
 
-L<Data::JavaScript::LiteObject>, L<Data::JavaScript::Anon>, L<CGI::AJAX>
+L<Data::JavaScript::LiteObject>, L<Data::JavaScript::Anon>, L<CGI::AJAX|CGI::Ajax>
 
 =head1 AUTHOR
 

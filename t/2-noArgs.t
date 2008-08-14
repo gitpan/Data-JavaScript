@@ -22,4 +22,4 @@ print "ok 3 #$_\n";
 
 $_ = join('', jsdump("Cherokee", "\x{13E3}\x{13E3}\x{13E3}"));
 print 'not ' unless $_ eq q(var Cherokee = "\u13E3\u13E3\u13E3";);
-print "ok 5 #$_\n";
+print "ok 4 #$_\n";

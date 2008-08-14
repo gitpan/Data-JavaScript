@@ -1,16 +1,21 @@
+Extract common aspects of __quotemeta into a string?
+
 ECMAScript and charset support for hjsdump
-	Encoding, escape [^[:print:]]
+
+Encoding, escape [^[:print:]]
+	Doesn't seem to include Unicode in 5.8.4...
 
 Numbers
-      Infinity
+	Infinity
 
-      NaN
+	NaN
 
-      const
+	const (check attribute?)
 
 Lightweight (object initializer) output for 1.2+
 	JavaScript 1.2 and later support a compact object notation known
-	as object literals. Instead of the verbose...
+	as object literals. We probably want to walk depth first if using
+	this notation.
 
 	HASH = {key:val}
 	ARRAY= [0, 1, 2]

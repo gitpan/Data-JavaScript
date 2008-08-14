@@ -1,4 +1,4 @@
-BEGIN { $| = 1; print "1..5\n"; }
+BEGIN { $| = 1; print "1..6\n"; }
 
 use Data::JavaScript;
 
@@ -23,3 +23,7 @@ print "ok 4 #$_\n";
 $_ = join('', jsdump('hex', '0xdeadbeef'));
 print 'not ' unless $_ eq 'var hex = "0xdeadbeef";';
 print "ok 5 #$_\n";
+
+$_ = join('', jsdump("IEsux", "</script>DoS!"));
+print 'not ' unless $_ eq 'var IEsux = "\x3C\x2Fscript\x3EDoS!";';
+print "ok 6 #$_\n";
